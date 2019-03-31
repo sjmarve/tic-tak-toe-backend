@@ -42,7 +42,7 @@ class GameTest extends TestCase
             'square' => 1
         ]);
         // dd($response->json());
-        $response->assertStatus(201);
+        $response->assertStatus(200);
     }
 
     /**
@@ -63,7 +63,7 @@ class GameTest extends TestCase
             'position' =>'xo-------',
             'square' => 4,
         ]);
-        dd($response->json());
+        // dd($response->json());
         $response->assertStatus(200);
     }
 }
