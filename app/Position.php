@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Position extends Model
 {
+    //assumes comp will always be o
+    protected $player = 'o';
 
     protected $guarded = [];
 
@@ -20,7 +22,7 @@ class Position extends Model
     public function processMove($square)
     {
         //only if move is valid
-        if($this->board[$square-1] == '-') {
+        if($this->board[$square] == '-') {
             //Check whether the game is over
             if($this->terminal()) {
                 $this->save();
@@ -28,7 +30,7 @@ class Position extends Model
             }else {
                 //Check new game and if still playing, get next move.
                 $board = $this->board;
-                $board[$square - 1] = "x";
+                $board[$square] = "x";
                 $this->data = implode("", $board);
 
                 if ($this->terminal()) {
@@ -36,11 +38,11 @@ class Position extends Model
                     $this->endgame();
                 } else {
                     $moves = $this->nextStates();
-                    $min = 1;
+                    $min = 2;
                     $next = $moves[0];
                     foreach ($moves as $pos) {
                         $curr = $pos->minimax();
-                        if ($curr <= $min) {
+                        if ($curr >= $min) {
                             $next = $pos;
                             $min = $curr;
                         }
@@ -85,18 +87,6 @@ class Position extends Model
     }
 
     /**
-     * Determine who is to play next x/o
-     * @return char The player who is suppose to play next
-     */
-    public function getPlayerAttribute()
-    {
-        //assumes that x always starts
-        return (substr_count($this->position, 'x') % 2 == 0)
-            && (substr_count($this->position, 'o') % 2 == 0)
-            ? 'o' : 'x';
-    }
-
-    /**
      * Transform position to array
      * @return array The position string split into an array
      */
@@ -111,14 +101,16 @@ class Position extends Model
      */
     public function nextStates()
     {
-
-        $next = array();
+        $game = $this->game;
+        $next = [];
         foreach ($this->board as $index => $square) {
             if ($square == "-") {
-                $next[] = Position::make([
+                $nextPosition = Position::make([
                     'data'    => $this->makeMove($index),
-                    'game_id' => $this->game->id,
+                    'game_id' => $game->id,
                 ]);
+                $nextPosition->switchPlayer();
+                $next[] = $nextPosition;
             }
         }
         return $next;
@@ -128,9 +120,9 @@ class Position extends Model
      * Switch player
      * @return char The switched Player
      */
-    public function playerSwitch()
+    public function switchPlayer()
     {
-        return $this->player == "o" ? 'x' : 'o';
+        $this->player = $this->player == 'o' ? 'x' : 'o';
     }
 
     public function maxPlayer(){
@@ -145,27 +137,21 @@ class Position extends Model
     public function makeMove($square)
     {
         if ($this->board[$square] == "-") {
-          $newposition = $this->board;
-          $newposition[$square] = $this->player;
-          return implode("", $newposition);
+          $newPosition = $this->board;
+          $newPosition[$square] = $this->player;
+          return implode("", $newPosition);
         } else {
             return false;
         }
     }
 
     /**
-     * Check whether the game is over
+     * Check whether the game is over - no more moves/win
      * @return bool true/false
      */
     public function terminal()
     {
-        if ($this->win() != 0) return true;
-        foreach ($this->board as $square) {
-            if ($square == "-") {
-                return false;
-            }
-        }
-        return true;
+        return $this->win() != 0 || false === array_search('-', $this->board);
     }
 
     /**
@@ -201,7 +187,7 @@ class Position extends Model
         }
 
         foreach ($lines as $line) {
-            if (self::checkline($line)) {
+            if ($this->checkline($line)) {
                 if ($line[0] == "o") {
                     return -1;
                 } else if ( $line[0] == "x" ) {
@@ -220,7 +206,7 @@ class Position extends Model
      *
      * @return bool Whether ther is a winner or not
      */
-    public static function checkline($line)
+    public function checkline($line)
     {
         return ((!($line[0] == "-")) && ($line[0] == $line[1]) && ($line[1] == $line[2]));
     }

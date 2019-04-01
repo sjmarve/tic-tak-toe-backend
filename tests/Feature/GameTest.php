@@ -66,4 +66,27 @@ class GameTest extends TestCase
         // dd($response->json());
         $response->assertStatus(200);
     }
+
+    /**
+     * test game progression
+     *
+     * @return void
+     */
+    public function testMiniMaxStrength()
+    {
+        $this->withoutExceptionHandling();
+
+        $game = factory(Game::class)->create();
+        $game->positions()->create([
+            'data' =>'---------', //dummy
+        ]);
+
+        $response = $this->json('patch', '/api/games/'.$game->id, [
+            'position' =>'x---o----',
+            'square' => 2,
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertEquals('xxo-o----', $response->json()['data']['last_position']);
+    }
 }

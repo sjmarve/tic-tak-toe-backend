@@ -50,7 +50,8 @@ class GameController extends Controller
             'game_id' => $game->id,
         ]);
 
-        $position->processMove($validData['square']);
+        //square is 1-9 but position is 0 based
+        $position->processMove($validData['square'] - 1);
 
         return new GameResource($game->fresh());
     }
@@ -74,7 +75,8 @@ class GameController extends Controller
             'data' => $validData['position'],
         ]);
 
-        $position->processMove($validData['square']);
+        //square is 1-9 but position is 0 based
+        $position->processMove($validData['square'] - 1);
 
         return new GameResource($game->fresh());
     }
