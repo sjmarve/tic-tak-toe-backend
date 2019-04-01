@@ -1,5 +1,7 @@
 # TicTacToe Backend
 
+This source code is a dependency of [VueJs FrontEnd](https://github.com/sjmarve/roam-frontend) 
+
 ### instructions for setup
 This is a laravel project ([laravel.com](laravel.com)).   
 To run it, it requires `php` and `mysql` or any relational db like postgres, mssql etc.
@@ -15,3 +17,7 @@ one with the least setup is running `php artisan serve`.
 
 make sure to update the VUE_APP_API_URL url in [TicTacToe Frontend](https://github.com/sjmarve/roam-frontend)  `.env` 
 which will be set to something like `VUE_APP_API_URL="http://127.0.0.1:8000"`
+
+### extras
+The source was developed using http tests TDD approach.   
+To run the test suite, cd into project root and run `phpunit`
